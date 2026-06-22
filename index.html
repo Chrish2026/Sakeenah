@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sakeenah — a verse and a saying for today</title>
+<style>
+  :root{
+    --sage-deep: #6f7d61;
+    --sage: #97a687;
+    --sand: #f4efe2;
+    --paper: #fffdf9;
+    --clay: #c17b54;
+    --ink: #3a3f33;
+    --ink-soft: #767d6c;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh;
+    background: linear-gradient(160deg, #eef1e4 0%, #f4efe2 45%, #ece3d2 100%);
+    font-family: 'Georgia','Iowan Old Style',serif;
+    color: var(--ink);
+    display:flex; align-items:center; justify-content:center;
+    padding: 24px;
+  }
+  .app{ width:100%; max-width:500px; text-align:center; }
+  .arabic-mark{ font-size:28px; color:var(--sage-deep); margin-bottom:8px; }
+  h1{ font-size:26px; font-weight:400; margin:0 0 6px; line-height:1.3; }
+  .sub{ font-family:'Helvetica Neue',sans-serif; font-size:14px; color:var(--ink-soft); line-height:1.5; margin-bottom:6px; }
+  .sub-ar{ font-family:'Helvetica Neue',sans-serif; font-size:13.5px; color:var(--ink-soft); direction:rtl; margin-bottom:28px; }
+
+  .card{
+    background: var(--paper); border:1px solid #e6dcc2; border-radius:18px;
+    padding:24px; box-shadow:0 6px 24px rgba(120,110,80,0.10);
+  }
+
+  .chips{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:18px; }
+  .chip{
+    font-family:'Helvetica Neue',sans-serif; font-size:13px;
+    background: var(--sand); border:1px solid #e6dcc2; border-radius:30px;
+    padding:8px 14px; cursor:pointer; color:var(--ink); transition:all .2s;
+    display:flex; align-items:center; gap:5px;
+  }
+  .chip:hover{ border-color:var(--sage); }
+  .chip.active{ background:var(--sage-deep); color:#fff; border-color:var(--sage-deep); }
+  .chip .ar{ direction:rtl; }
+
+  .input-wrap{ position:relative; }
+  textarea{
+    width:100%; min-height:110px; background:transparent; position:relative; z-index:1;
+    border:1px solid #ddd3ba; border-radius:14px; color:var(--ink);
+    padding:16px; font-size:16px; font-family:inherit; line-height:1.5;
+    resize:none; outline:none; transition:border-color .2s;
+  }
+  textarea:focus{ border-color:var(--sage); }
+  .placeholder-overlay{
+    position:absolute; top:0; left:0; right:0; bottom:0;
+    border-radius:14px; background:var(--paper);
+    padding:16px; pointer-events:none; z-index:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+  }
+  .placeholder-overlay .en{ color:#aba690; font-size:15.5px; text-align:center; }
+  .placeholder-overlay .ar{ color:#aba690; font-size:15px; direction:rtl; text-align:center; }
+
+  .controls{ display:flex; gap:10px; margin-top:14px; }
+  button{ font-family:'Helvetica Neue',sans-serif; cursor:pointer; border:none; border-radius:30px; }
+  .mic-btn, .submit-btn{ flex:1; height:50px; font-size:14px; transition:all .2s; }
+  .mic-btn{ background:var(--sand); border:1px solid #ddd3ba; color:var(--clay); display:flex; align-items:center; justify-content:center; font-size:18px; }
+  .mic-btn.recording{ background:var(--clay); color:#fff; animation:pulse 1.4s infinite; }
+  @keyframes pulse{ 0%{box-shadow:0 0 0 0 rgba(193,123,84,.45);} 70%{box-shadow:0 0 0 12px rgba(193,123,84,0);} 100%{box-shadow:0 0 0 0 rgba(193,123,84,0);} }
+  .submit-btn{ background:var(--sage-deep); color:#fdfcf6; font-weight:600; box-shadow:0 4px 14px rgba(111,125,97,.25); }
+  .submit-btn:hover{ opacity:.94; }
+  .submit-btn .btn-en{ display:block; font-size:14px; }
+  .submit-btn .btn-ar{ display:block; font-size:12px; direction:rtl; opacity:.9; }
+
+  .hint{ margin-top:12px; font-size:12.5px; color:var(--ink-soft); font-family:'Helvetica Neue',sans-serif; line-height:1.6; min-height:16px; }
+
+  .result{ margin-top:26px; text-align:left; display:none; animation:fade .5s ease; }
+  .result.show{ display:block; }
+  @keyframes fade{ from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+  .section-label{ font-family:'Helvetica Neue',sans-serif; font-size:11.5px; letter-spacing:1.2px; text-transform:uppercase; color:var(--clay); font-weight:600; margin-bottom:8px; display:flex; gap:8px; }
+  .section-label .ar{ direction:rtl; text-transform:none; color:var(--sage-deep); }
+  .block{ background:var(--sand); border:1px solid #e6dcc2; border-radius:14px; padding:18px; margin-bottom:16px; }
+  .ref{ font-family:'Helvetica Neue',sans-serif; font-size:11px; color:var(--ink-soft); margin-bottom:10px; }
+  .arabic-text{ font-size:21px; line-height:2; color:var(--sage-deep); direction:rtl; margin-bottom:12px; }
+  .english-text{ font-size:16px; line-height:1.6; color:var(--ink); }
+  .note{ font-family:'Helvetica Neue',sans-serif; font-size:13px; line-height:1.55; color:var(--ink-soft); margin-top:4px; }
+
+  .actions{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+  .again, .print-btn, .image-btn{ flex:1; min-width:110px; background:none; border:1px solid #ddd3ba; color:var(--ink-soft); padding:10px 8px; font-size:12.5px; border-radius:30px; transition:all .2s; }
+  .again:hover, .print-btn:hover, .image-btn:hover{ color:var(--ink); border-color:var(--sage); }
+  .image-btn:disabled{ opacity:.5; cursor:wait; }
+
+  footer{ margin-top:22px; font-family:'Helvetica Neue',sans-serif; font-size:11px; color:var(--ink-soft); line-height:1.6; }
+  footer .ar{ direction:rtl; margin-top:4px; }
+
+  #printArea{ display:none; }
+  @media print{
+    body *{ visibility:hidden; }
+    #printArea, #printArea *{ visibility:visible; }
+    #printArea{ display:block; position:absolute; top:0; left:0; width:100%; padding:40px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="arabic-mark">🌿 سكينة</div>
+  <h1>Sakeenah</h1>
+  <div class="sub">Tell me what's on your heart, and sit with a verse and a saying of the Prophet ﷺ</div>
+  <div class="sub-ar">أخبرني بما يثقل قلبك، واجلس مع آية وحديث عن النبي ﷺ</div>
+
+  <div class="card">
+    <div class="chips" id="chips">
+      <button class="chip" data-theme="anxious">😟 <span>Anxious</span><span class="ar">قلق</span></button>
+      <button class="chip" data-theme="sad">😔 <span>Sad</span><span class="ar">حزين</span></button>
+      <button class="chip" data-theme="grief">💔 <span>Grieving</span><span class="ar">حزن</span></button>
+      <button class="chip" data-theme="lonely">🫂 <span>Lonely</span><span class="ar">وحيد</span></button>
+      <button class="chip" data-theme="angry">😠 <span>Angry</span><span class="ar">غاضب</span></button>
+      <button class="chip" data-theme="fearful">😨 <span>Afraid</span><span class="ar">خائف</span></button>
+      <button class="chip" data-theme="tired">😴 <span>Tired</span><span class="ar">متعب</span></button>
+      <button class="chip" data-theme="grateful">🙏 <span>Grateful</span><span class="ar">شاكر</span></button>
+    </div>
+
+    <div class="input-wrap">
+      <div class="placeholder-overlay" id="placeholderOverlay">
+        <div class="en">I've been feeling...</div>
+        <div class="ar">اكتب ما تشعر به اليوم... أو اضغط على الميكروفون للتحدث</div>
+      </div>
+      <textarea id="input"></textarea>
+    </div>
+
+    <div class="controls">
+      <button class="mic-btn" id="micBtn" title="Record a voice note">🎙️</button>
+      <button class="submit-btn" id="seekBtn">
+        <span class="btn-en">Find me a verse</span>
+        <span class="btn-ar">أجد لي آية</span>
+      </button>
+    </div>
+    <div class="hint" id="hint"></div>
+
+    <div class="result" id="result">
+      <div class="section-label"><span>From the Qur'an</span><span class="ar">من القرآن</span></div>
+      <div class="block">
+        <div class="ref" id="verseRef"></div>
+        <div class="arabic-text" id="verseArabic"></div>
+        <div class="english-text" id="verseEnglish"></div>
+      </div>
+
+      <div class="section-label"><span>From the Hadith</span><span class="ar">من الحديث</span></div>
+      <div class="block">
+        <div class="ref" id="hadithRef"></div>
+        <div class="arabic-text" id="hadithArabic"></div>
+        <div class="english-text" id="hadithEnglish"></div>
+      </div>
+
+      <div class="note" id="resultNote"></div>
+
+      <div class="actions">
+        <button class="again" id="againBtn">Write something new</button>
+        <button class="print-btn" id="printBtn">🖨️ Print this</button>
+        <button class="image-btn" id="imageBtn">🖼️ Generate image</button>
+      </div>
+      <div class="hint" id="imageHint"></div>
+      <a id="imageDownloadLink" style="display:none;"></a>
+    </div>
+  </div>
+
+  <footer>
+    Verses from the Qur'an and hadiths from Sahih al-Bukhari & Sahih Muslim. Everything works offline — nothing you write is sent anywhere.
+    <div class="ar">آيات من القرآن الكريم وأحاديث من صحيح البخاري وصحيح مسلم. يعمل التطبيق بالكامل دون اتصال بالإنترنت، ولا يُرسل ما تكتبه إلى أي مكان.</div>
+  </footer>
+</div>
+
+<div id="printArea">
+  <div class="ref" id="printVerseRef"></div>
+  <div class="arabic-text" id="printVerseArabic" style="font-size:24px;"></div>
+  <div class="english-text" id="printVerseEnglish" style="font-size:18px;margin-bottom:24px;"></div>
+  <hr>
+  <div class="ref" id="printHadithRef"></div>
+  <div class="arabic-text" id="printHadithArabic" style="font-size:24px;"></div>
+  <div class="english-text" id="printHadithEnglish" style="font-size:18px;"></div>
+</div>
+
+<script>
+// --- Bundled verse + hadith data (Arabic + English), fully offline ---
+const SAKEENAH_DATA = {"anxious": {"verse": {"ref": "Surah Ar-Ra'd (The Thunder) 13:28", "arabic": "ٱلَّذِينَ ءَامَنُواْ وَتَطۡمَئِنُّ قُلُوبُهُم بِذِكۡرِ ٱللَّهِۗ أَلَا بِذِكۡرِ ٱللَّهِ تَطۡمَئِنُّ ٱلۡقُلُوبُ", "english": "Those who have believed and whose hearts are assured by the remembrance of Allah. Unquestionably, by the remembrance of Allah hearts are assured"}, "hadith": {"ref": "Sahih al-Bukhari, Hadith 5641", "arabic": "حَدَّثَنِي عَبْدُ اللَّهِ بْنُ مُحَمَّدٍ، حَدَّثَنَا عَبْدُ الْمَلِكِ بْنُ عَمْرٍو، حَدَّثَنَا زُهَيْرُ بْنُ مُحَمَّدٍ، عَنْ مُحَمَّدِ بْنِ عَمْرِو بْنِ حَلْحَلَةَ، عَنْ عَطَاءِ بْنِ يَسَارٍ، عَنْ أَبِي سَعِيدٍ الْخُدْرِيِّ، وَعَنْ أَبِي هُرَيْرَةَ، عَنِ النَّبِيِّ صلى الله عليه وسلم قَالَ ‏ \"‏ مَا يُصِيبُ الْمُسْلِمَ مِنْ نَصَبٍ وَلاَ وَصَبٍ وَلاَ هَمٍّ وَلاَ حُزْنٍ وَلاَ أَذًى وَلاَ غَمٍّ حَتَّى الشَّوْكَةِ يُشَاكُهَا، إِلاَّ كَفَّرَ اللَّهُ بِهَا مِنْ خَطَايَاهُ ‏\"‏‏.‏", "english": "Narrated Abu Sa`id Al-Khudri and Abu Huraira:The Prophet (ﷺ) said, \"No fatigue, nor disease, nor sorrow, nor sadness, nor hurt, nor distress befalls a Muslim, even if it were the prick he receives from a thorn, but that Allah expiates some of his sins for that"}, "note": "When your mind is racing, this verse points back to the one place stillness actually comes from."}, "fearful": {"verse": {"ref": "Surah At-Tawbah (The Repentance) 9:40", "arabic": "إِلَّا تَنصُرُوهُ فَقَدۡ نَصَرَهُ ٱللَّهُ إِذۡ أَخۡرَجَهُ ٱلَّذِينَ كَفَرُواْ ثَانِيَ ٱثۡنَيۡنِ إِذۡ هُمَا فِي ٱلۡغَارِ إِذۡ يَقُولُ لِصَٰحِبِهِۦ لَا تَحۡزَنۡ إِنَّ ٱللَّهَ مَعَنَاۖ فَأَنزَلَ ٱللَّهُ سَكِينَتَهُۥ عَلَيۡهِ وَأَيَّدَهُۥ بِجُنُودٖ لَّمۡ تَرَوۡهَا وَجَعَلَ كَلِمَةَ ٱلَّذِينَ كَفَرُواْ ٱلسُّفۡلَىٰۗ وَكَلِمَةُ ٱللَّهِ هِيَ ٱلۡعُلۡيَاۗ وَٱللَّهُ عَزِيزٌ حَكِيمٌ", "english": "If you do not aid the Prophet - Allah has already aided him when those who disbelieved had driven him out [of Makkah] as one of two, when they were in the cave and he said to his companion, \"Do not grieve; indeed Allah is with us.\" And Allah sent down his tranquillity upon him and supported him with angels you did not see and made the word of those who disbelieved the lowest, while the word of Allah - that is the highest. And Allah is Exalted in Might and Wise"}, "hadith": {"ref": "Sahih al-Bukhari, Hadith 5641", "arabic": "حَدَّثَنِي عَبْدُ اللَّهِ بْنُ مُحَمَّدٍ، حَدَّثَنَا عَبْدُ الْمَلِكِ بْنُ عَمْرٍو، حَدَّثَنَا زُهَيْرُ بْنُ مُحَمَّدٍ، عَنْ مُحَمَّدِ بْنِ عَمْرِو بْنِ حَلْحَلَةَ، عَنْ عَطَاءِ بْنِ يَسَارٍ، عَنْ أَبِي سَعِيدٍ الْخُدْرِيِّ، وَعَنْ أَبِي هُرَيْرَةَ، عَنِ النَّبِيِّ صلى الله عليه وسلم قَالَ ‏ \"‏ مَا يُصِيبُ الْمُسْلِمَ مِنْ نَصَبٍ وَلاَ وَصَبٍ وَلاَ هَمٍّ وَلاَ حُزْنٍ وَلاَ أَذًى وَلاَ غَمٍّ حَتَّى الشَّوْكَةِ يُشَاكُهَا، إِلاَّ كَفَّرَ اللَّهُ بِهَا مِنْ خَطَايَاهُ ‏\"‏‏.‏", "english": "Narrated Abu Sa`id Al-Khudri and Abu Huraira:The Prophet (ﷺ) said, \"No fatigue, nor disease, nor sorrow, nor sadness, nor hurt, nor distress befalls a Muslim, even if it were the prick he receives from a thorn, but that Allah expiates some of his sins for that"}, "note": "Fear and faith can sit in the same heart — even hardship carries some quiet relief with it."}, "sad": {"verse": {"ref": "Surah Ash-Sharh (The Relief) 94:5", "arabic": "فَإِنَّ مَعَ ٱلۡعُسۡرِ يُسۡرًا", "english": "For indeed, with hardship [will be] ease"}, "hadith": {"ref": "Sahih al-Bukhari, Hadith 1252", "arabic": "حَدَّثَنَا آدَمُ، حَدَّثَنَا شُعْبَةُ، حَدَّثَنَا ثَابِتٌ، عَنْ أَنَسِ بْنِ مَالِكٍ ـ رضى الله عنه ـ قَالَ مَرَّ النَّبِيُّ صلى الله عليه وسلم بِامْرَأَةٍ عِنْدَ قَبْرٍ وَهِيَ تَبْكِي فَقَالَ ‏ \"‏ اتَّقِي اللَّهَ وَاصْبِرِي ‏\"‏‏.‏", "english": "Narrated Anas bin Malik:The Prophet (ﷺ) passed by a woman who was sitting and weeping beside a grave and said to her, \"Fear Allah and be patient"}, "note": "Repeated twice in the original passage — as if to make sure it's heard even through grief."}, "grief": {"verse": {"ref": "Surah Al-Baqarah (The Cow) 2:156", "arabic": "ٱلَّذِينَ إِذَآ أَصَٰبَتۡهُم مُّصِيبَةٞ قَالُوٓاْ إِنَّا لِلَّهِ وَإِنَّآ إِلَيۡهِ رَٰجِعُونَ", "english": "Who, when disaster strikes them, say, \"Indeed we belong to Allah, and indeed to Him we will return"}, "hadith": {"ref": "Sahih al-Bukhari, Hadith 1252", "arabic": "حَدَّثَنَا آدَمُ، حَدَّثَنَا شُعْبَةُ، حَدَّثَنَا ثَابِتٌ، عَنْ أَنَسِ بْنِ مَالِكٍ ـ رضى الله عنه ـ قَالَ مَرَّ النَّبِيُّ صلى الله عليه وسلم بِامْرَأَةٍ عِنْدَ قَبْرٍ وَهِيَ تَبْكِي فَقَالَ ‏ \"‏ اتَّقِي اللَّهَ وَاصْبِرِي ‏\"‏‏.‏", "english": "Narrated Anas bin Malik:The Prophet (ﷺ) passed by a woman who was sitting and weeping beside a grave and said to her, \"Fear Allah and be patient"}, "note": "Said directly to a grieving woman — patience here isn't pretending it doesn't hurt."}, "angry": {"verse": {"ref": "Surah Ali 'Imran (Family of Imran) 3:134", "arabic": "ٱلَّذِينَ يُنفِقُونَ فِي ٱلسَّرَّآءِ وَٱلضَّرَّآءِ وَٱلۡكَٰظِمِينَ ٱلۡغَيۡظَ وَٱلۡعَافِينَ عَنِ ٱلنَّاسِۗ وَٱللَّهُ يُحِبُّ ٱلۡمُحۡسِنِينَ", "english": "Who spend [in the cause of Allah] during ease and hardship and who restrain anger and who pardon the people - and Allah loves the doers of good"}, "hadith": {"ref": "Sahih al-Bukhari, Hadith 6116", "arabic": "حَدَّثَنِي يَحْيَى بْنُ يُوسُفَ، أَخْبَرَنَا أَبُو بَكْرٍ ـ هُوَ ابْنُ عَيَّاشٍ ـ عَنْ أَبِي حَصِينٍ، عَنْ أَبِي صَالِحٍ، عَنْ أَبِي هُرَيْرَةَ ـ رضى الله عنه ـ أَنَّ رَجُلاً، قَالَ لِلنَّبِيِّ صلى الله عليه وسلم أَوْصِنِي‏.‏ قَالَ ‏\"‏ لاَ تَغْضَبْ ‏\"‏‏.‏ فَرَدَّدَ مِرَارًا، قَالَ ‏\"‏ لاَ تَغْضَبْ ‏\"‏‏.‏", "english": "Narrated Abu Huraira:A man said to the Prophet (ﷺ) , \"Advise me! \"The Prophet (ﷺ) said, \"Do not become angry and furious.\" The man asked (the same) again and again, and the Prophet (ﷺ) said in each case, \"Do not become angry and furious"}, "note": "Not asking you to pretend it didn't hurt — just naming what's heavy to put down."}, "betrayed": {"verse": {"ref": "Surah Ali 'Imran (Family of Imran) 3:54", "arabic": "وَمَكَرُواْ وَمَكَرَ ٱللَّهُۖ وَٱللَّهُ خَيۡرُ ٱلۡمَٰكِرِينَ", "english": "And the disbelievers planned, but Allah planned. And Allah is the best of planners"}, "hadith": {"ref": "Sahih al-Bukhari, Hadith 1302", "arabic": "حَدَّثَنَا مُحَمَّدُ بْنُ بَشَّارٍ، حَدَّثَنَا غُنْدَرٌ، حَدَّثَنَا شُعْبَةُ، عَنْ ثَابِتٍ، قَالَ سَمِعْتُ أَنَسًا ـ رضى الله عنه ـ عَنِ النَّبِيِّ صلى الله عليه وسلم قَالَ ‏ \"‏ الصَّبْرُ عِنْدَ الصَّدْمَةِ الأُولَى ‏\"‏‏.‏", "english": "Narrated Anas:The Prophet (ﷺ) said, \"The real patience is at the first stroke of a calamity"}, "note": "For when people's words or schemes have hurt you — you're not the one left to settle the score."}, "lonely": {"verse": {"ref": "Surah Al-Hadid (The Iron) 57:4", "arabic": "هُوَ ٱلَّذِي خَلَقَ ٱلسَّمَٰوَٰتِ وَٱلۡأَرۡضَ فِي سِتَّةِ أَيَّامٖ ثُمَّ ٱسۡتَوَىٰ عَلَى ٱلۡعَرۡشِۖ يَعۡلَمُ مَا يَلِجُ فِي ٱلۡأَرۡضِ وَمَا يَخۡرُجُ مِنۡهَا وَمَا يَنزِلُ مِنَ ٱلسَّمَآءِ وَمَا يَعۡرُجُ فِيهَاۖ وَهُوَ مَعَكُمۡ أَيۡنَ مَا كُنتُمۡۚ وَٱللَّهُ بِمَا تَعۡمَلُونَ بَصِيرٞ", "english": "It is He who created the heavens and earth in six days and then established Himself above the Throne. He knows what penetrates into the earth and what emerges from it and what descends from the heaven and what ascends therein; and He is with you wherever you are. And Allah, of what you do, is Seeing"}, "hadith": {"ref": "Sahih Muslim, Hadith 6952", "arabic": "حَدَّثَنِي سُوَيْدُ بْنُ سَعِيدٍ، حَدَّثَنَا حَفْصُ بْنُ مَيْسَرَةَ، حَدَّثَنِي زَيْدُ بْنُ أَسْلَمَ، عَنْ أَبِي، صَالِحٍ عَنْ أَبِي هُرَيْرَةَ، عَنْ رَسُولِ اللَّهِ صلى الله عليه وسلم أَنَّهُ قَالَ ‏ \"‏ قَالَ اللَّهُ عَزَّ وَجَلَّ أَنَا عِنْدَ ظَنِّ عَبْدِي بِي وَأَنَا مَعَهُ حَيْثُ يَذْكُرُنِي وَاللَّهِ لَلَّهُ أَفْرَحُ بِتَوْبَةِ عَبْدِهِ مِنْ أَحَدِكُمْ يَجِدُ ضَالَّتَهُ بِالْفَلاَةِ وَمَنْ تَقَرَّبَ إِلَىَّ شِبْرًا تَقَرَّبْتُ إِلَيْهِ ذِرَاعًا وَمَنْ تَقَرَّبَ إِلَىَّ ذِرَاعًا تَقَرَّبْتُ إِلَيْهِ بَاعًا وَإِذَا أَقْبَلَ إِلَىَّ يَمْشِي أَقْبَلْتُ إِلَيْهِ أُهَرْوِلُ ‏\"‏ ‏.‏", "english": "Abu Huraira reported Allah's Messenger (ﷺ) as saying:Allah, the Exalted and Glorious, said: I live in the thought of My servant and I am with him as he remembers Me. (The Holy Prophet) further said: By Allah, Allah is more pleased wth the repentance of His servant than what one of you would do on finding the lost camel in the waterless desert. When he draws near Me by the span of his hand. I draw near him by the length of a cubit and when he draws near Me by the length of a cubit. I draw near him by the length of a fathom and when he draws near Me walking I draw close to him hurriedly"}, "note": "Even in an empty room, this says you are not unaccompanied."}, "guilty": {"verse": {"ref": "Surah Az-Zumar (The Troops) 39:53", "arabic": "۞قُلۡ يَٰعِبَادِيَ ٱلَّذِينَ أَسۡرَفُواْ عَلَىٰٓ أَنفُسِهِمۡ لَا تَقۡنَطُواْ مِن رَّحۡمَةِ ٱللَّهِۚ إِنَّ ٱللَّهَ يَغۡفِرُ ٱلذُّنُوبَ جَمِيعًاۚ إِنَّهُۥ هُوَ ٱلۡغَفُورُ ٱلرَّحِيمُ", "english": "Say, \"O My servants who have transgressed against themselves [by sinning], do not despair of the mercy of Allah. Indeed, Allah forgives all sins. Indeed, it is He who is the Forgiving, the Merciful"}, "hadith": {"ref": "Sahih al-Bukhari, Hadith 834", "arabic": "حَدَّثَنَا قُتَيْبَةُ بْنُ سَعِيدٍ، قَالَ حَدَّثَنَا اللَّيْثُ، عَنْ يَزِيدَ بْنِ أَبِي حَبِيبٍ، عَنْ أَبِي الْخَيْرِ، عَنْ عَبْدِ اللَّهِ بْنِ عَمْرٍو، عَنْ أَبِي بَكْرٍ الصِّدِّيقِ ـ رضى الله عنه ـ‏.‏ أَنَّهُ قَالَ لِرَسُولِ اللَّهِ صلى الله عليه وسلم عَلِّمْنِي دُعَاءً أَدْعُو بِهِ فِي صَلاَتِي‏.‏ قَالَ ‏ \"‏ قُلِ اللَّهُمَّ إِنِّي ظَلَمْتُ نَفْسِي ظُلْمًا كَثِيرًا ��َلاَ يَغْفِرُ الذُّنُوبَ إِلاَّ أَنْتَ، فَاغْفِرْ لِي مَغْفِرَةً مِنْ عِنْدِكَ، وَارْحَمْنِي إِنَّكَ أَنْتَ الْغَفُورُ الرَّحِيمُ ‏\"‏‏.‏", "english": "Narrated Abu Bakr As-Siddiq:I asked Allah's Messenger (ﷺ) to teach me an invocation so that I may invoke Allah with it in my prayer. He told me to say, \"Allahumma inni zalumtu nafsi zulman kathiran, Wala yaghfiru dh-dhunuba illa anta, fa ghfir li maghfiratan min `indika, wa r-hamni, innaka anta l-ghafuru r-rahim (O Allah! I have done great injustice to myself and none except You forgives sins, so bestow on me a forgiveness from You, and Have Mercy on me, You are the Forgiver, the Merciful)"}, "note": "Whatever you're replaying in your head tonight — there's a door back that stays open."}, "grateful": {"verse": {"ref": "Surah Ibrahim (Abraham) 14:7", "arabic": "وَإِذۡ تَأَذَّنَ رَبُّكُمۡ لَئِن شَكَرۡتُمۡ لَأَزِيدَنَّكُمۡۖ وَلَئِن كَفَرۡتُمۡ إِنَّ عَذَابِي لَشَدِيدٞ", "english": "And [remember] when your Lord proclaimed, 'If you are grateful, I will surely increase you [in favor]; but if you deny, indeed, My punishment is severe"}, "hadith": {"ref": "Sahih al-Bukhari, Hadith 1130", "arabic": "حَدَّثَنَا أَبُو نُعَيْمٍ، قَالَ حَدَّثَنَا مِسْعَرٌ، عَنْ زِيَادٍ، قَالَ سَمِعْتُ الْمُغِيرَةَ ـ رضى الله عنه ـ يَقُولُ إِنْ كَانَ النَّبِيُّ صلى الله عليه وسلم لَيَقُومُ لِيُصَلِّيَ حَتَّى تَرِمُ قَدَمَاهُ أَوْ سَاقَاهُ، فَيُقَالُ لَهُ فَيَقُولُ ‏ \"‏ أَفَلاَ أَكُونُ عَبْدًا شَكُورًا ‏\"‏‏.‏", "english": "Narrated Al-Mughira:The Prophet (ﷺ) used to stand (in the prayer) or pray till both his feet or legs swelled. He was asked why (he offered such an unbearable prayer) and he said, \"Should I not be a thankful slave?"}, "note": "A reminder that noticing the good is itself an act that multiplies it."}, "patient": {"verse": {"ref": "Surah Al-Baqarah (The Cow) 2:153", "arabic": "يَـٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُواْ ٱسۡتَعِينُواْ بِٱلصَّبۡرِ وَٱلصَّلَوٰةِۚ إِنَّ ٱللَّهَ مَعَ ٱلصَّـٰبِرِينَ", "english": "O you who have believed, seek help through patience and prayer. Indeed, Allah is with the patient"}, "hadith": {"ref": "Sahih al-Bukhari, Hadith 1302", "arabic": "حَدَّثَنَا مُحَمَّدُ بْنُ بَشَّارٍ، حَدَّثَنَا غُنْدَرٌ، حَدَّثَنَا شُعْبَةُ، عَنْ ثَابِتٍ، قَالَ سَمِعْتُ أَنَسًا ـ رضى الله عنه ـ عَنِ النَّبِيِّ صلى الله عليه وسلم قَالَ ‏ \"‏ الصَّبْرُ عِنْدَ الصَّدْمَةِ الأُولَى ‏\"‏‏.‏", "english": "Narrated Anas:The Prophet (ﷺ) said, \"The real patience is at the first stroke of a calamity"}, "note": "Patience here isn't silence — it's staying steady while you wait for things to change."}, "tired": {"verse": {"ref": "Surah Ash-Sharh (The Relief) 94:1", "arabic": "أَلَمۡ نَشۡرَحۡ لَكَ صَدۡرَكَ", "english": "Did We not expand for you, [O Muhammad], your breast"}, "hadith": {"ref": "Sahih al-Bukhari, Hadith 5645", "arabic": "حَدَّثَنَا عَبْدُ اللَّهِ بْنُ يُوسُفَ، أَخْبَرَنَا مَالِكٌ، عَنْ مُحَمَّدِ بْنِ عَبْدِ اللَّهِ بْنِ عَبْدِ الرَّحْمَنِ بْنِ أَبِي صَعْصَعَةَ، أَنَّهُ قَالَ سَمِعْتُ سَعِيدَ بْنَ يَسَارٍ أَبَا الْحُبَابِ، يَقُولُ سَمِعْتُ أَبَا هُرَيْرَةَ، يَقُولُ قَالَ رَسُولُ اللَّهِ صلى الله عليه وسلم ‏ \"‏ مَنْ يُرِدِ اللَّهُ بِهِ خَيْرًا يُصِبْ مِنْهُ ‏\"‏‏.‏", "english": "Narrated Abu Huraira:Allah's Messenger (ﷺ) said, \"If Allah wants to do good to somebody, He afflicts him with trials"}, "note": "Relief is named here as something already underway, not something you have to force."}, "hopeless": {"verse": {"ref": "Surah Az-Zumar (The Troops) 39:53", "arabic": "۞قُلۡ يَٰعِبَادِيَ ٱلَّذِينَ أَسۡرَفُواْ عَلَىٰٓ أَنفُسِهِمۡ لَا تَقۡنَطُواْ مِن رَّحۡمَةِ ٱللَّهِۚ إِنَّ ٱللَّهَ يَغۡفِرُ ٱلذُّنُوبَ جَمِيعًاۚ إِنَّهُۥ هُوَ ٱلۡغَفُورُ ٱلرَّحِيمُ", "english": "Say, \"O My servants who have transgressed against themselves [by sinning], do not despair of the mercy of Allah. Indeed, Allah forgives all sins. Indeed, it is He who is the Forgiving, the Merciful"}, "hadith": {"ref": "Sahih al-Bukhari, Hadith 6309", "arabic": "حَدَّثَنَا إِسْحَاقُ، أَخْبَرَنَا حَبَّانُ، حَدَّثَنَا هَمَّامٌ، حَدَّثَنَا قَتَادَةُ، حَدَّثَنَا أَنَسُ بْنُ مَالِكٍ، عَنِ النَّبِيِّ صلى الله عليه وسلم‏.‏ وَحَدَّثَنَا هُدْبَةُ، حَدَّثَنَا هَمَّامٌ، حَدَّثَنَا قَتَادَةُ، عَنْ أَنَسٍ ـ رضى الله عنه ـ قَالَ قَالَ رَسُولُ اللَّهِ صلى الله عليه وسلم ‏ \"‏ اللَّهُ أَفْرَحُ بِتَوْبَةِ عَبْدِهِ مِنْ أَحَدِكُمْ سَقَطَ عَلَى بَعِيرِهِ، وَقَدْ أَضَلَّهُ فِي أَرْضِ فَلاَةٍ ‏\"‏‏.‏", "english": "Narrated Anas bin Malik:Allah's Messenger (ﷺ) said, \"Allah is more pleased with the repentance of His slave than anyone of you is pleased with finding his camel which he had lost in the desert"}, "note": "A gentle pull back from the edge of hopelessness."}, "default": {"verse": {"ref": "Surah Al-Baqarah (The Cow) 2:286", "arabic": "لَا يُكَلِّفُ ٱللَّهُ نَفۡسًا إِلَّا وُسۡعَهَاۚ لَهَا مَا كَسَبَتۡ وَعَلَيۡهَا مَا ٱكۡتَسَبَتۡۗ رَبَّنَا لَا تُؤَاخِذۡنَآ إِن نَّسِينَآ أَوۡ أَخۡطَأۡنَاۚ رَبَّنَا وَلَا تَحۡمِلۡ عَلَيۡنَآ إِصۡرٗا كَمَا حَمَلۡتَهُۥ عَلَى ٱلَّذِينَ مِن قَبۡلِنَاۚ رَبَّنَا وَلَا تُحَمِّلۡنَا مَا لَا طَاقَةَ لَنَا بِهِۦۖ وَٱعۡفُ عَنَّا وَٱغۡفِرۡ لَنَا وَٱرۡحَمۡنَآۚ أَنتَ مَوۡلَىٰنَا فَٱنصُرۡنَا عَلَى ٱلۡقَوۡمِ ٱلۡكَٰفِرِينَ", "english": "Allah does not charge a soul except [with that within] its capacity. It will have [the consequence of] what [good] it has gained, and it will bear [the consequence of] what [evil] it has earned. \"Our Lord, do not impose blame upon us if we have forgotten or erred. Our Lord, and lay not upon us a burden like that which You laid upon those before us. Our Lord, and burden us not with that which we have no ability to bear. And pardon us; and forgive us; and have mercy upon us. You are our protector, so give us victory over the disbelieving people"}, "hadith": {"ref": "Sahih Muslim, Hadith 6774", "arabic": "حَدَّثَنَا أَبُو بَكْرِ بْنُ أَبِي شَيْبَةَ، وَابْنُ، نُمَيْرٍ قَالاَ حَدَّثَنَا عَبْدُ اللَّهِ بْنُ إِدْرِيسَ، عَنْ رَبِيعَةَ بْنِ عُثْمَانَ، عَنْ مُحَمَّدِ بْنِ يَحْيَى بْنِ حَبَّانَ، عَنِ الأَعْرَجِ، عَنْ أَبِي هُرَيْرَةَ، قَالَ قَالَ رَسُولُ اللَّهِ صلى الله عليه وسلم ‏ \"‏ الْمُؤْمِنُ الْقَوِيُّ خَيْرٌ وَأَحَبُّ إِلَى اللَّهِ مِنَ الْمُؤْمِنِ الضَّعِيفِ وَفِي كُلٍّ خَيْرٌ احْرِصْ عَلَى مَا يَنْفَعُكَ وَاسْتَعِنْ بِاللَّهِ وَلاَ تَعْجِزْ وَإِنْ أَصَابَكَ شَىْءٌ فَلاَ تَقُلْ لَوْ أَنِّي فَعَلْتُ كَانَ كَذَا وَكَذَا ‏.‏ وَلَكِنْ قُلْ قَدَرُ اللَّهِ وَمَا شَاءَ فَعَلَ فَإِنَّ لَوْ تَفْتَحُ عَمَلَ الشَّيْطَانِ ‏\"‏ ‏.‏", "english": "Abu Huraira reported Allah's Messenger (ﷺ) as saying:A strong believer is better and is more lovable to Allah than a weak believer, and there is good in everyone, (but) cherish that which gives you benefit (in the Hereafter) and seek help from Allah and do not lose heart, and if anything (in the form of trouble) comes to you, don't say: If I had not done that, it would not have happened so and so, but say: Allah did that what He had ordained to do and your\" if\" opens the (gate) for the Satan"}, "note": "A verse and saying for whatever today is, even when it's hard to name."}};
+
+const keywordMap = {
+  anxious: ["anxious","anxiety","worried","worry","overthinking","panic","nervous","stressed","stress","racing thoughts","overwhelmed"],
+  fearful: ["afraid","scared","fear","terrified","frightened"],
+  sad: ["sad","crying","cry","heartbroken","depressed","down","hurting","hopeless","empty"],
+  grief: ["grief","grieving","loss","died","death","passed away","lost my"],
+  angry: ["angry","mad","furious","rage","resentful","bitter","frustrated"],
+  betrayed: ["betrayed","lied","backstabbed","gossip","talking behind","behind my back","trust broken","cheated on","betrayal"],
+  lonely: ["alone","lonely","isolated","abandoned","left out","nobody"],
+  guilty: ["guilty","ashamed","regret","sinned","mistake","shame"],
+  grateful: ["grateful","thankful","blessed","thank god","alhamdulillah"],
+  patient: ["waiting","patience","patient","delay","stuck"],
+  tired: ["tired","exhausted","burnt out","burned out","drained","no energy","fatigue"],
+  hopeless: ["hopeless","despair","give up","giving up","no point","pointless"]
+};
+
+function pickTheme(text){
+  const lower = text.toLowerCase();
+  for(const theme in keywordMap){
+    for(const kw of keywordMap[theme]){
+      if(lower.includes(kw)) return theme;
+    }
+  }
+  return "default";
+}
+
+let currentEntry = null;
+
+function showResult(theme){
+  const entry = SAKEENAH_DATA[theme] || SAKEENAH_DATA.default;
+  currentEntry = entry;
+
+  document.getElementById('verseRef').textContent = entry.verse.ref;
+  document.getElementById('verseArabic').textContent = entry.verse.arabic;
+  document.getElementById('verseEnglish').textContent = entry.verse.english;
+
+  document.getElementById('hadithRef').textContent = entry.hadith.ref;
+  document.getElementById('hadithArabic').textContent = entry.hadith.arabic;
+  document.getElementById('hadithEnglish').textContent = entry.hadith.english;
+
+  document.getElementById('resultNote').textContent = entry.note;
+
+  document.getElementById('printVerseRef').textContent = entry.verse.ref;
+  document.getElementById('printVerseArabic').textContent = entry.verse.arabic;
+  document.getElementById('printVerseEnglish').textContent = entry.verse.english;
+  document.getElementById('printHadithRef').textContent = entry.hadith.ref;
+  document.getElementById('printHadithArabic').textContent = entry.hadith.arabic;
+  document.getElementById('printHadithEnglish').textContent = entry.hadith.english;
+
+  document.getElementById('result').classList.add('show');
+  document.getElementById('hint').textContent = "";
+  document.getElementById('result').scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function updatePlaceholderVisibility(){
+  const val = document.getElementById('input').value;
+  document.getElementById('placeholderOverlay').style.display = val.length ? 'none' : 'flex';
+}
+
+document.getElementById('input').addEventListener('input', ()=>{
+  updatePlaceholderVisibility();
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+});
+
+document.getElementById('seekBtn').addEventListener('click', ()=>{
+  const text = document.getElementById('input').value.trim();
+  const hint = document.getElementById('hint');
+  if(!text){
+    hint.textContent = "Write or speak a little about how you're feeling first.";
+    return;
+  }
+  showResult(pickTheme(text));
+});
+
+document.getElementById('againBtn').addEventListener('click', ()=>{
+  document.getElementById('result').classList.remove('show');
+  document.getElementById('input').value = '';
+  updatePlaceholderVisibility();
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  document.getElementById('input').focus();
+});
+
+document.getElementById('printBtn').addEventListener('click', ()=>{
+  window.print();
+});
+
+// ---- Generate a shareable image (canvas-drawn, fully offline) ----
+function wrapText(ctx, text, x, y, maxWidth, lineHeight, align){
+  const words = text.split(' ');
+  let line = '';
+  const lines = [];
+  for(let n=0; n<words.length; n++){
+    const testLine = line + words[n] + ' ';
+    if(ctx.measureText(testLine).width > maxWidth && n > 0){
+      lines.push(line.trim());
+      line = words[n] + ' ';
+    } else {
+      line = testLine;
+    }
+  }
+  lines.push(line.trim());
+  lines.forEach((l, i)=>{
+    ctx.textAlign = align;
+    ctx.fillText(l, x, y + i*lineHeight);
+  });
+  return lines.length;
+}
+
+function drawIslamicBorder(ctx, w, h){
+  const margin = 28;
+  ctx.save();
+  ctx.strokeStyle = '#c17b54';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(margin, margin, w - margin*2, h - margin*2);
+  ctx.lineWidth = 1.2;
+  ctx.strokeStyle = 'rgba(193,123,84,0.5)';
+  ctx.strokeRect(margin+12, margin+12, w - (margin+12)*2, h - (margin+12)*2);
+
+  // simple repeating 8-pointed star motif along the top and bottom edges
+  function star(cx, cy, r){
+    ctx.beginPath();
+    for(let i=0;i<8;i++){
+      const a1 = (Math.PI/4)*i;
+      const a2 = a1 + Math.PI/8;
+      const x1 = cx + r*Math.cos(a1), y1 = cy + r*Math.sin(a1);
+      const x2 = cx + (r*0.45)*Math.cos(a2), y2 = cy + (r*0.45)*Math.sin(a2);
+      if(i===0) ctx.moveTo(x1,y1); else ctx.lineTo(x1,y1);
+      ctx.lineTo(x2,y2);
+    }
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(151,166,135,0.35)';
+    ctx.fill();
+  }
+  const spacing = 70;
+  for(let x = margin+40; x < w-margin-20; x += spacing){
+    star(x, margin+6, 9);
+    star(x, h-margin-6, 9);
+  }
+  for(let y = margin+40; y < h-margin-20; y += spacing){
+    star(margin+6, y, 9);
+    star(w-margin-6, y, 9);
+  }
+  ctx.restore();
+}
+
+document.getElementById('imageBtn').addEventListener('click', ()=>{
+  if(!currentEntry) return;
+  const imgBtn = document.getElementById('imageBtn');
+  const imageHint = document.getElementById('imageHint');
+  imgBtn.disabled = true;
+  imgBtn.textContent = "Creating...";
+
+  const W = 1080, H = 1350; // portrait, good for sharing
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // background gradient (matches the app's morning garden palette)
+  const grad = ctx.createLinearGradient(0,0,W,H);
+  grad.addColorStop(0, '#eef1e4');
+  grad.addColorStop(0.5, '#f4efe2');
+  grad.addColorStop(1, '#ece3d2');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,W,H);
+
+  drawIslamicBorder(ctx, W, H);
+
+  const cx = W/2;
+  let y = 150;
+
+  ctx.fillStyle = '#6f7d61';
+  ctx.font = '46px Georgia, serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('سكينة', cx, y);
+  y += 70;
+
+  ctx.fillStyle = '#767d6c';
+  ctx.font = '20px Helvetica, Arial, sans-serif';
+  ctx.fillText('Sakeenah — a moment of stillness', cx, y);
+  y += 80;
+
+  // Qur'an verse
+  ctx.fillStyle = '#c17b54';
+  ctx.font = 'bold 18px Helvetica, Arial, sans-serif';
+  ctx.fillText(currentEntry.verse.ref.toUpperCase(), cx, y);
+  y += 50;
+
+  ctx.fillStyle = '#3f5d54';
+  ctx.font = '34px Georgia, serif';
+  ctx.direction = 'rtl';
+  y += wrapText(ctx, currentEntry.verse.arabic, cx, y, W-220, 50, 'center') * 50 + 20;
+  ctx.direction = 'ltr';
+
+  ctx.fillStyle = '#3a3f33';
+  ctx.font = 'italic 24px Georgia, serif';
+  y += wrapText(ctx, currentEntry.verse.english, cx, y, W-220, 36, 'center') * 36 + 50;
+
+  // divider
+  ctx.strokeStyle = 'rgba(193,123,84,0.4)';
+  ctx.beginPath();
+  ctx.moveTo(cx-100, y); ctx.lineTo(cx+100, y);
+  ctx.stroke();
+  y += 50;
+
+  // Hadith
+  ctx.fillStyle = '#c17b54';
+  ctx.font = 'bold 18px Helvetica, Arial, sans-serif';
+  ctx.fillText(currentEntry.hadith.ref.toUpperCase(), cx, y);
+  y += 50;
+
+  ctx.fillStyle = '#3f5d54';
+  ctx.font = '30px Georgia, serif';
+  ctx.direction = 'rtl';
+  y += wrapText(ctx, currentEntry.hadith.arabic, cx, y, W-220, 44, 'center') * 44 + 20;
+  ctx.direction = 'ltr';
+
+  ctx.fillStyle = '#3a3f33';
+  ctx.font = '22px Georgia, serif';
+  y += wrapText(ctx, currentEntry.hadith.english, cx, y, W-220, 32, 'center') * 32 + 10;
+
+  // footer
+  ctx.fillStyle = '#767d6c';
+  ctx.font = '14px Helvetica, Arial, sans-serif';
+  ctx.fillText('Generated with Sakeenah', cx, H-60);
+
+  canvas.toBlob((blob)=>{
+    const url = URL.createObjectURL(blob);
+    const link = document.getElementById('imageDownloadLink');
+    link.href = url;
+    link.download = 'sakeenah-verse.png';
+    link.click();
+    imgBtn.disabled = false;
+    imgBtn.textContent = "🖼️ Generate image";
+    imageHint.textContent = "Image downloaded — you can now share it from your downloads or photos.";
+  }, 'image/png');
+});
+
+document.querySelectorAll('.chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    const theme = chip.dataset.theme;
+    document.getElementById('input').value = chip.querySelector('span').textContent;
+    updatePlaceholderVisibility();
+    showResult(theme);
+  });
+});
+
+// ---- Voice input via Web Speech API ----
+const micBtn = document.getElementById('micBtn');
+const hint = document.getElementById('hint');
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+let recording = false;
+let textBeforeSession = '';
+let finalizedThisSession = '';
+
+function getMicHelp(){
+  const ua = navigator.userAgent;
+  const isSecure = window.isSecureContext;
+  if(!isSecure){
+    return "This page isn't loaded securely, so the browser blocks microphone access outright here — no setting will fix that. Typing works fine instead.";
+  }
+  if(/iPhone|iPad/.test(ua)){
+    return "On iPhone: open Settings → scroll to Safari (or Chrome) → Microphone → turn it on, then reload this page.";
+  }
+  if(/Android/.test(ua) && /Chrome/.test(ua)){
+    return "On Android Chrome: tap the lock/info icon in the address bar → Permissions → Microphone → Allow, then reload.";
+  }
+  if(/Firefox/.test(ua)){
+    return "In Firefox: click the lock icon in the address bar → Connection secure → site permissions → allow the microphone, then reload.";
+  }
+  if(/Chrome/.test(ua)){
+    return "In Chrome: click the 🔒 or ⓘ icon in the address bar → Site settings → set Microphone to Allow, then reload.";
+  }
+  if(/Safari/.test(ua)){
+    return "In Safari: go to Safari → Settings for This Website → Microphone → Allow, then reload.";
+  }
+  return "Check your browser's site settings and allow microphone access for this page, then reload.";
+}
+
+if(SpeechRecognition){
+  recognition = new SpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+
+  recognition.onresult = (event)=>{
+    let interim = '';
+    for(let i=event.resultIndex; i<event.results.length; i++){
+      const transcript = event.results[i][0].transcript;
+      if(event.results[i].isFinal){
+        finalizedThisSession += transcript + ' ';
+      } else {
+        interim += transcript;
+      }
+    }
+    const combined = (textBeforeSession + finalizedThisSession + interim).trim();
+    document.getElementById('input').value = combined;
+    updatePlaceholderVisibility();
+  };
+
+  recognition.onend = ()=>{
+    recording = false;
+    micBtn.classList.remove('recording');
+    hint.textContent = '';
+    const finalText = (textBeforeSession + finalizedThisSession).trim();
+    document.getElementById('input').value = finalText;
+    updatePlaceholderVisibility();
+  };
+
+  recognition.onerror = (e)=>{
+    recording = false;
+    micBtn.classList.remove('recording');
+    if(e.error === 'not-allowed' || e.error === 'permission-denied' || e.error === 'service-not-allowed'){
+      hint.textContent = "Microphone access is blocked. " + getMicHelp();
+    } else {
+      hint.textContent = "Couldn't hear that — typing works just as well.";
+    }
+  };
+
+  micBtn.addEventListener('click', ()=>{
+    if(!recording){
+      const current = document.getElementById('input').value;
+      textBeforeSession = current.length ? current + ' ' : '';
+      finalizedThisSession = '';
+      recognition.start();
+      recording = true;
+      micBtn.classList.add('recording');
+      hint.textContent = "Listening...";
+    } else {
+      recognition.stop();
+    }
+  });
+} else {
+  micBtn.addEventListener('click', ()=>{
+    hint.textContent = "Voice input isn't supported in this browser — typing works just as well.";
+  });
+}
+</script>
+
+</body>
+</html>

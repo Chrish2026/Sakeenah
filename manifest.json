@@ -1,0 +1,31 @@
+{
+  "name": "Sakeenah — Verse & Hadith for Hard Moments",
+  "short_name": "Sakeenah",
+  "description": "Type or speak what's on your heart, and receive a matched Qur'an verse and authentic hadith — fully offline.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f4efe2",
+  "theme_color": "#6f7d61",
+  "orientation": "portrait",
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
